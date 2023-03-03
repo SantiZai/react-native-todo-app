@@ -12,6 +12,7 @@ const Main = () => {
             <Route path='/tasks' element={<TasksPage />} />
             <Route path='/tasks/:id' element={<Task />} />
             <Route path='/newtask' element={<NewTask />} />
+            <Route path='/newtask/:id' element={<NewTask />} />
         </Routes>
     )
 }
