@@ -4,7 +4,11 @@ import { Text } from '@ui-kitten/components'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { Link, useNavigate } from 'react-router-native'
 import { ITask } from '../../interfaces/ITask'
-import { bringTasks, updateTask } from '../../services/TasksServices'
+import {
+	bringTasks,
+	deleteTask,
+	updateTask,
+} from '../../services/TasksServices'
 import { constantsTheme } from '../../themes'
 
 const Tasks = () => {
@@ -16,7 +20,7 @@ const Tasks = () => {
 		bringTasks()
 			.then(res => setTasks(res))
 			.catch(e => console.error(e))
-	}, [])
+	}, [tasks])
 
 	const handleComplete = (id: number) => {
 		const updatedTasks = tasks.map(task => {
@@ -31,6 +35,8 @@ const Tasks = () => {
 		setTasks(updatedTasks)
 	}
 
+	const stylesText = [styles.text, styles.badge]
+
 	return (
 		<View style={constantsTheme.container}>
 			<View style={{ padding: 20 }}>
@@ -41,39 +47,108 @@ const Tasks = () => {
 						<Icon name='ios-chevron-back' size={24} color='#666' />
 					</TouchableOpacity>
 				</View>
-				<View>
-					{tasks.map(task => {
-						return (
-							<View key={task.id} style={styles.cardTask}>
-								<View style={styles.details}>
-									<TouchableOpacity
-										style={{ paddingRight: 10 }}
-										onPress={() => {
-											handleComplete(task.id)
-										}}>
-										<Icon
-											name={
-												task.completed
-													? 'ios-checkmark-circle'
-													: 'ios-checkmark-circle-outline'
-											}
-											size={24}
-											color='#666'
-										/>
-									</TouchableOpacity>
-									<Text
-										category='h6'
-										style={[
-											styles.titleTask,
-											task.completed && styles.completed,
-										]}>
-										{task.title}
-									</Text>
+				{tasks.length <= 0 ? (
+					<View style={{ height: '80%', justifyContent: 'center' }}>
+						<Text category='h1' style={{ textAlign: 'center' }}>
+							You haven't tasks
+						</Text>
+						<Link to='/newtask'>
+							<Text style={{ textAlign: 'center' }}>
+								Create a new task here
+							</Text>
+						</Link>
+					</View>
+				) : (
+					<View>
+						{tasks.map(task => {
+							return (
+								<View key={task.id} style={styles.cardTask}>
+									<View style={styles.details}>
+										<TouchableOpacity
+											style={{ paddingRight: 10 }}
+											onPress={() => {
+												handleComplete(task.id)
+											}}>
+											<Icon
+												name={
+													task.completed
+														? 'ios-checkmark-circle'
+														: 'ios-checkmark-circle-outline'
+												}
+												size={24}
+												color='#666'
+											/>
+										</TouchableOpacity>
+										<Link
+											to={`${task.id}`}
+											style={{
+												justifyContent: 'flex-end',
+											}}>
+											<Text
+												category='h6'
+												style={[
+													styles.titleTask,
+													task.completed &&
+														styles.completed,
+												]}>
+												{task.title}
+											</Text>
+										</Link>
+										<View
+											style={{
+												justifyContent: 'flex-end',
+												marginLeft: 10,
+											}}>
+											<Text style={{ color: '#E9ECEF' }}>
+												{task.description}
+											</Text>
+										</View>
+									</View>
+									<View style={{ flexDirection: 'row' }}>
+										<View
+											style={{
+												paddingVertical: 5,
+												paddingHorizontal: 15,
+												borderRadius: 5,
+												marginRight: 5,
+												justifyContent: 'flex-end',
+												backgroundColor:
+													task.level &&
+													task.level.toString() ===
+														'INFO'
+														? '#007474'
+														: task.level &&
+														  task.level.toString() ===
+																'WARNING'
+														? '#C3B000'
+														: '#A80A00',
+											}}>
+											<Text style={stylesText}>
+												{task.level}
+											</Text>
+										</View>
+										<TouchableOpacity
+											onPress={async () => {
+												await deleteTask(task.id)
+												navigate('/tasks')
+											}}
+											style={{
+												marginRight: 10,
+												alignItems: 'flex-end',
+												justifyContent: 'center'
+											}}>
+											<Icon
+												name='ios-trash'
+												size={24}
+												color='#999'
+											/>
+										</TouchableOpacity>
+									</View>
 								</View>
-							</View>
-						)
-					})}
-				</View>
+							)
+						})}
+					</View>
+				)}
 			</View>
 		</View>
 	)
@@ -81,10 +156,14 @@ const Tasks = () => {
 
 const styles = StyleSheet.create({
 	cardTask: {
-		paddingVertical: 10,
+		paddingVertical: 15,
 		paddingHorizontal: 10,
 		backgroundColor: '#333',
 		marginTop: 10,
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		borderRadius: 5,
 	},
 	details: {
 		flexDirection: 'row',
@@ -96,6 +175,14 @@ const styles = StyleSheet.create({
 	},
 	completed: {
 		textDecorationLine: 'line-through',
+	},
+	text: {
+		textAlign: 'center',
+		color: '#E9ECEF',
+	},
+	badge: {
+		fontWeight: 'bold',
+		letterSpacing: 0.4,
 	},
 })
 

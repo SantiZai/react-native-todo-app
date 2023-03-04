@@ -4,20 +4,41 @@ import { Text } from '@ui-kitten/components'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { useNavigate, useParams } from 'react-router-native'
 import { ITask } from '../../interfaces/ITask'
-import { bringTask, deleteTask } from '../../services/TasksServices'
+import {
+	bringTask,
+	bringTasks,
+	deleteTask,
+	updateTask,
+} from '../../services/TasksServices'
 import { constantsTheme } from '../../themes'
 
 const Task = () => {
 	const [task, setTask] = useState({} as ITask)
+	const [tasks, setTasks] = useState([] as ITask[])
 
 	const { id } = useParams()
 
 	useEffect(() => {
-		bringTask(id)
-			.then(res => setTask(res))
+		bringTask(id).then(res => setTask(res))
+		bringTasks().then(res => setTasks(res))
 	}, [])
 
 	const navigate = useNavigate()
+
+	const handleComplete = async (id: number) => {
+		const updatedTasks = tasks.map(task => {
+			if (task.id === id) {
+				const updatedTask = { ...task, completed: !task.completed }
+				updateTask(task.id, updatedTask)
+				return updatedTask
+			} else {
+				return task
+			}
+		})
+		setTasks(updatedTasks)
+		const updatedTask = updatedTasks.find(task => task.id === id)
+		updatedTask && setTask(updatedTask)
+	}
 
 	const stylesContainer = [constantsTheme.container, styles.container]
 	const stylesText = [styles.text, styles.badge]
@@ -37,7 +58,7 @@ const Task = () => {
 					backgroundColor: '#333',
 					justifyContent: 'center',
 					alignItems: 'center',
-                    borderRadius: 10
+					borderRadius: 10,
 				}}>
 				<View style={styles.containerTask}>
 					<View style={{ alignItems: 'flex-end' }}>
@@ -46,15 +67,22 @@ const Task = () => {
 								width: 50,
 								height: 50,
 								alignItems: 'flex-end',
+							}}
+							onPress={() => {
+								handleComplete(task.id)
 							}}>
 							<Icon
-								name='ios-chevron-back'
+								name={
+									task.completed
+										? 'ios-checkmark-circle'
+										: 'ios-checkmark-circle-outline'
+								}
 								size={24}
 								color='#999'
 							/>
 						</TouchableOpacity>
 					</View>
-					<View style={{marginVertical: 50, gap: 30}}>
+					<View style={{ marginVertical: 50, gap: 30 }}>
 						<Text style={styles.text} category='h2'>
 							{task.title}
 						</Text>
@@ -66,14 +94,14 @@ const Task = () => {
 						style={{
 							flexDirection: 'row',
 							justifyContent: 'space-between',
-                            marginTop: 50
+							marginTop: 50,
 						}}>
 						<View style={{ flexDirection: 'row' }}>
 							<TouchableOpacity
-                                onPress={async () => {
-                                    await deleteTask(task.id)
-                                    navigate('/tasks')
-                                }}
+								onPress={async () => {
+									await deleteTask(task.id)
+									navigate('/tasks')
+								}}
 								style={{
 									marginRight: 10,
 									alignItems: 'flex-end',
@@ -81,7 +109,7 @@ const Task = () => {
 								<Icon name='ios-trash' size={24} color='#999' />
 							</TouchableOpacity>
 							<TouchableOpacity
-                                onPress={() => navigate(`/newtask/${id}`)}
+								onPress={() => navigate(`/newtask/${id}`)}
 								style={{
 									alignItems: 'flex-end',
 								}}>
@@ -98,9 +126,11 @@ const Task = () => {
 								paddingHorizontal: 15,
 								borderRadius: 5,
 								backgroundColor:
-									task.level && task.level.toString() === 'INFO'
+									task.level &&
+									task.level.toString() === 'INFO'
 										? '#007474'
-										: task.level && task.level.toString() === 'WARNING'
+										: task.level &&
+										  task.level.toString() === 'WARNING'
 										? '#C3B000'
 										: '#A80A00',
 							}}>
@@ -116,8 +146,8 @@ const Task = () => {
 const styles = StyleSheet.create({
 	container: {
 		alignItems: 'center',
-        gap: 100,
-        backgroundColor: '#E9ECEF'
+		gap: 100,
+		backgroundColor: '#E9ECEF',
 	},
 	containerTask: {
 		width: '100%',
