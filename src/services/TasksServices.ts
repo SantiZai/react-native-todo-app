@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios'
 import { ITask } from './../interfaces/ITask'
 
-const API = 'http://192.168.1.2:8080/api/tasks'
+const API = 'https://spring-api-todo-application-production.up.railway.app/api/tasks'
 
 export const bringTasks = async (): Promise<ITask[]> => {
     const res = await axios.get<ITask[]>(API)

@@ -30,10 +30,10 @@ const HomePage = () => {
 							style={styles.containerIcon}
 							activeOpacity={0.8}
 							underlayColor='#DEE2E6'
-							onPress={() => navigate('/tasks')}>
+							onPress={() => navigate('/account')}>
 							<View style={styles.icon}>
-								<Icon name='ios-home' size={24} color='#333' />
-								<Text>Home</Text>
+								<Icon name='ios-person' size={24} color='#333' />
+								<Text>Account</Text>
 							</View>
 						</TouchableHighlight>
 						<View

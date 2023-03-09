@@ -89,7 +89,7 @@ const Form = () => {
 					onPressOut={() => {
 						setButtonColor('#666')
 						!id ? saveTask(task) : updateTask(parseInt(id), task)
-						console.log(task, id)
+						navigate('/tasks')
 					}}>
 					Create task
 				</Button>
